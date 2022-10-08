@@ -33,7 +33,7 @@ function init() {
   mainContainer = document.querySelector("#webgl-scene")
   scene = new THREE.Scene()
 
-  const background2 = new THREE.TextureLoader().load("../img/desert.jpg")
+  const background2 = new THREE.TextureLoader().load("img/desert.jpg")
   let skyGeometry = new THREE.SphereGeometry(90, 32, 32)
   let skyMaterial = new THREE.MeshBasicMaterial({
     map: background2,
@@ -110,7 +110,7 @@ function createLights() {
 }
 
 function createPlane() {
-  const texture = new THREE.TextureLoader().load("../img/Rock_texture.jpg") // load texture
+  const texture = new THREE.TextureLoader().load("img/Rock_texture.jpg") // load texture
   texture.anisotropy = 16 // set anisotropy coef.
 
   // Set min max texture filters
@@ -140,7 +140,7 @@ function createPlane() {
 }
 function createFloor() {
   const geometry = new THREE.PlaneGeometry(16, 16)
-  const texture = new THREE.TextureLoader().load("../img/wood.jpg")
+  const texture = new THREE.TextureLoader().load("img/wood.jpg")
   texture.wrapS = THREE.RepeatWrapping
   texture.wrapT = THREE.RepeatWrapping
   texture.repeat.set(2, 2)
@@ -164,17 +164,15 @@ function createSideWall() {
   shape.lineTo(-8, 8)
   shape.lineTo(-8, 0)
   const extrudeGeometry = new THREE.ExtrudeGeometry(shape)
-  const texture = new THREE.TextureLoader().load(
-    "../img/wall_bricks_images.jpg"
-  )
+  const texture = new THREE.TextureLoader().load("img/wall_bricks_images.jpg")
   // texture.repeat.set(0.5, 0.5)
-  const bump = new THREE.TextureLoader().load("../img/brick_bump.jpg") // load bump map
+  const bump = new THREE.TextureLoader().load("img/brick_bump.jpg") // load bump map
   bump.wrapS = THREE.RepeatWrapping
   bump.wrapT = THREE.RepeatWrapping
   bump.repeat.set(0.5, 0.5)
 
   // Load normal map
-  let normal = new THREE.TextureLoader().load("../img/wall_brick_normal.jpg") // load bump map
+  let normal = new THREE.TextureLoader().load("img/wall_brick_normal.jpg") // load bump map
   normal.wrapS = THREE.RepeatWrapping
   normal.wrapT = THREE.RepeatWrapping
   normal.repeat.set(0.5, 0.5)
@@ -208,9 +206,7 @@ function createBackWall() {
   shape.lineTo(8.5, 8.5)
   shape.lineTo(-7.5, 8.5)
   const extrudeGeometry = new THREE.ExtrudeGeometry(shape)
-  const texture = new THREE.TextureLoader().load(
-    "../img/wall_bricks_images.jpg"
-  )
+  const texture = new THREE.TextureLoader().load("img/wall_bricks_images.jpg")
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping
   texture.repeat.set(0.1, 0.05)
   const material = new THREE.MeshStandardMaterial({ map: texture })
@@ -243,9 +239,7 @@ function createFrontWall() {
   door.lineTo(-3, 0)
   shape.holes.push(door)
   const extrudeGeometry = new THREE.ExtrudeGeometry(shape)
-  const texture = new THREE.TextureLoader().load(
-    "../img/wall_bricks_images.jpg"
-  )
+  const texture = new THREE.TextureLoader().load("img/wall_bricks_images.jpg")
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping
   texture.repeat.set(0.1, 0.05)
   const material = new THREE.MeshStandardMaterial({ map: texture })
