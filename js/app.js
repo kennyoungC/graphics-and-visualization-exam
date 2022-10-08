@@ -259,21 +259,21 @@ function createFrontWall() {
 
 function createRoof() {
   const geometry = new THREE.BoxGeometry(14, 17, 1)
-  const texture = new THREE.TextureLoader().load("../img/tile.jpg")
-  texture.wrapS = texture.wrapT = THREE.RepeatWrapping
-  texture.repeat.set(2, 1)
-  texture.rotation = Math.PI / 2
-  const textureMaterial = new THREE.MeshStandardMaterial({ map: texture })
-  const colorMaterial = new THREE.MeshStandardMaterial({ color: "grey" })
-  const materials = [
-    colorMaterial,
-    colorMaterial,
-    colorMaterial,
-    colorMaterial,
-    colorMaterial,
-    textureMaterial,
-  ]
-  const roof = new THREE.Mesh(geometry, materials)
+  // const texture = new THREE.TextureLoader().load("../img/tile.jpg")
+  // texture.wrapS = texture.wrapT = THREE.RepeatWrapping
+  // texture.repeat.set(2, 1)
+  // texture.rotation = Math.PI / 2
+  // const textureMaterial = new THREE.MeshStandardMaterial({ map: texture })
+  const colorMaterial = new THREE.MeshStandardMaterial({ color: "black" })
+  // const materials = [
+  //   colorMaterial,
+  //   colorMaterial,
+  //   colorMaterial,
+  //   colorMaterial,
+  //   colorMaterial,
+  //   textureMaterial,
+  // ]
+  const roof = new THREE.Mesh(geometry, colorMaterial)
 
   scene.add(roof)
   roof.rotation.x = Math.PI / 2
