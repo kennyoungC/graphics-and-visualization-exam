@@ -110,7 +110,7 @@ function createLights() {
 }
 
 function createPlane() {
-  const texture = new THREE.TextureLoader().load("../img/rocks.webp") // load texture
+  const texture = new THREE.TextureLoader().load("../img/Rock_texture.jpg") // load texture
   texture.anisotropy = 16 // set anisotropy coef.
 
   // Set min max texture filters
@@ -311,7 +311,7 @@ function createGarageRoof() {
   return roof
 }
 function createDoor() {
-  let door = new THREE.PlaneBufferGeometry(4, 7.5, 15)
+  let door = new THREE.PlaneGeometry(4, 7.5, 15)
   const texture = new THREE.TextureLoader().load("../img/wooden_door.jpg")
 
   // texture.anisotropy = 30
@@ -328,7 +328,7 @@ function createDoor() {
 }
 
 function createWindow() {
-  let window = new THREE.PlaneBufferGeometry(4, 6, 7.5)
+  let window = new THREE.PlaneGeometry(4, 6, 7.5)
   const texture = new THREE.TextureLoader().load("../img/wooden_door.jpg")
 
   // texture.anisotropy = 30
