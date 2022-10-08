@@ -259,7 +259,7 @@ function createFrontWall() {
 
 function createRoof() {
   const geometry = new THREE.BoxGeometry(14, 17, 1)
-  // const texture = new THREE.TextureLoader().load("../img/tile.jpg")
+  // const texture = new THREE.TextureLoader().load("img/tile.jpg")
   // texture.wrapS = texture.wrapT = THREE.RepeatWrapping
   // texture.repeat.set(2, 1)
   // texture.rotation = Math.PI / 2
@@ -285,10 +285,10 @@ function createRoof() {
 }
 function createGarageRoof() {
   const geometry = new THREE.BoxGeometry(21, 21, 1)
-  const texture = new THREE.TextureLoader().load("../img/favour.jpg")
+  const texture = new THREE.TextureLoader().load("img/favour.jpg")
   texture.anisotropy = 16
 
-  const bump = new THREE.TextureLoader().load("../img/name_bump.jpg") // load bump map
+  const bump = new THREE.TextureLoader().load("img/name_bump.jpg") // load bump map
   // const bump = new THREE.TextureLoader().load("img/wood_bump.jpg")
   texture.wrapS = texture.wrapT = THREE.RepeatWrapping
   texture.repeat.set(1, 1)
@@ -312,7 +312,7 @@ function createGarageRoof() {
 }
 function createDoor() {
   let door = new THREE.PlaneGeometry(4, 7.5, 15)
-  const texture = new THREE.TextureLoader().load("../img/wooden_door.jpg")
+  const texture = new THREE.TextureLoader().load("img/wooden_door.jpg")
 
   // texture.anisotropy = 30
   texture.wrapS = THREE.RepeatWrapping
@@ -329,7 +329,7 @@ function createDoor() {
 
 function createWindow() {
   let window = new THREE.PlaneGeometry(4, 6, 7.5)
-  const texture = new THREE.TextureLoader().load("../img/wooden_door.jpg")
+  const texture = new THREE.TextureLoader().load("img/wooden_door.jpg")
 
   // texture.anisotropy = 30
   texture.wrapS = THREE.RepeatWrapping
@@ -398,7 +398,7 @@ function createRod() {
 // Create sprite
 function createCloud() {
   const cloudTexture = new THREE.TextureLoader().load(
-    "../img/cloud-removebg-preview.png"
+    "img/cloud-removebg-preview.png"
   )
   const cloudMaterial = new THREE.SpriteMaterial({
     map: cloudTexture,
