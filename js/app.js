@@ -6,7 +6,8 @@ My WebGL App
 import * as THREE from "./mods/three.module.js"
 import Stats from "./mods/stats.module.js"
 import { OrbitControls } from "./mods/OrbitControls.js"
-
+import { TWEEN } from "./mods/tween.module.min.js"
+import { GUI } from "./mods/lil-gui.module.min.js"
 import { Water } from "./mods/Water2.js" // lib for water effect
 
 // Global variables
@@ -19,12 +20,17 @@ let scene = null
 
 let camControls = null
 // Global Meshes
-
+let gui = null
+let controlBoxParams = {
+  rotateSpeed: 0,
+  scaleWheel: 1,
+}
 let plane,
+  particle,
   floor,
-  box,
-  sphere,
-  cone = null
+  tire,
+  wheel,
+  rim = null
 
 let water = null
 
@@ -48,6 +54,12 @@ function init() {
   createMeshes()
   createLights()
   createRenderer()
+
+  createRotateTween()
+  if (typeof wheel !== undefined) {
+    createGroupRotateTween()
+  }
+  createCtrlBox()
   renderer.setAnimationLoop(() => {
     update()
     render()
@@ -55,10 +67,19 @@ function init() {
 }
 
 // Animations
-function update() {}
+function update() {
+  TWEEN.update()
+  // animations sliders
+  if (typeof wheel !== "undefined") {
+    wheel.rotation.z += controlBoxParams.rotateSpeed / 100
+    wheel.rotation.y += controlBoxParams.rotateSpeed / 200
+  }
+}
 
 // Statically rendered content
 function render() {
+  particle.rotation.x += 0.001
+  particle.rotation.y -= 0.03
   stats.begin()
   renderer.render(scene, camera)
   stats.end()
@@ -90,6 +111,30 @@ function createControls() {
   camControls.autoRotate = false
 }
 
+// Sliders controls
+function createCtrlBox() {
+  gui = new GUI()
+  gui
+    .add(controlBoxParams, "rotateSpeed")
+    .min(1)
+    .max(9)
+    .step(0.1)
+    .name("Wheel rotation")
+
+  let cntScale = gui
+    .add(controlBoxParams, "scaleWheel")
+    .min(0.1)
+    .max(2)
+    .step(0.1)
+    .name("Wheel size")
+  cntScale.listen()
+  cntScale.onChange(function (value) {
+    // wheel.scale.set(1, 1, controlBoxParams.scaleWheel);
+    tire.scale.set(1, 1, controlBoxParams.scaleWheel)
+    rim.scale.set(1, 1, controlBoxParams.scaleWheel)
+  })
+}
+
 // Light objects
 function createLights() {
   const spotLight = new THREE.SpotLight(0xffffff)
@@ -107,6 +152,93 @@ function createLights() {
 
   const ambientLight = new THREE.AmbientLight(0xffffff, 0.2) // 0x111111 - 0xaaaaaa, 1 ; 0xffffff, 0.1 - 0.3; 0x404040
   scene.add(ambientLight)
+}
+function createWheel() {
+  const texture = new THREE.TextureLoader().load("img/tire.jpg")
+  texture.wrapS = THREE.RepeatWrapping
+  texture.wrapT = THREE.RepeatWrapping
+  texture.repeat.set(20, 5)
+
+  const bump = new THREE.TextureLoader().load("img/tire_bump.jpg")
+  bump.wrapS = THREE.RepeatWrapping
+  bump.wrapT = THREE.RepeatWrapping
+  bump.repeat.set(20, 5)
+
+  let geometry = new THREE.TorusGeometry(3, 1, 16, 100)
+  let material = new THREE.MeshStandardMaterial({
+    map: texture,
+    bumpMap: bump,
+    bumpScale: 0.2,
+  })
+  tire = new THREE.Mesh(geometry, material)
+
+  // tire.position.set(0, 4, -10);
+  // tire.translateY(4);
+  // tire.translateZ(-10);
+  // scene.add( tire );
+
+  // create rim
+  const ballTexture = new THREE.TextureLoader().load("img/ball.jpg")
+  let rimGeometry = new THREE.SphereGeometry(2, 32, 16)
+  let rimMaterial = new THREE.MeshStandardMaterial({
+    map: ballTexture,
+    side: THREE.DoubleSide,
+    transparent: true,
+  })
+  rim = new THREE.Mesh(rimGeometry, rimMaterial)
+
+  wheel = new THREE.Group()
+  wheel.add(tire)
+  wheel.add(rim)
+
+  //wheel.position.set(0, 4, -10);
+  //scene.add(wheel);
+
+  tire.translateZ(-15)
+  rim.translateZ(-15)
+  wheel.position.set(7, 4, 10)
+  scene.add(wheel)
+}
+function createRotateTween() {
+  let position = { rotStep: -Math.PI }
+  let tween1 = new TWEEN.Tween(position).to({ rotStep: Math.PI }, 8000)
+  tween1.easing(TWEEN.Easing.Linear.None)
+  tween1.onUpdate(() => {
+    tire.rotation.y = position.rotStep
+    tire.position.x = 15 * Math.sin(position.rotStep)
+    tire.position.z = 15 * Math.cos(position.rotStep)
+  })
+  tween1.repeat(Infinity) // 1,2 arba Infinity
+  tween1.start() // stop
+
+  let rotation = { rotZ: -Math.PI }
+  let tween2 = new TWEEN.Tween(rotation).to({ rotZ: Math.PI }, 4000)
+  tween2.easing(TWEEN.Easing.Linear.None)
+  tween2.onUpdate(() => {
+    tire.rotation.z = -rotation.rotZ
+  })
+  tween2.repeat(Infinity) // 1,2 arba Infinity
+  tween2.start() // stop
+}
+function createGroupRotateTween() {
+  let position = { rotStep: -Math.PI }
+  let tween1 = new TWEEN.Tween(position).to({ rotStep: Math.PI }, 8000)
+  tween1.easing(TWEEN.Easing.Linear.None)
+  tween1.onUpdate(() => {
+    wheel.rotation.y = position.rotStep
+  })
+  tween1.repeat(Infinity) // 1,2 arba Infinity
+  tween1.start() // stop
+
+  let rotation = { rotZ: -Math.PI }
+  let tween2 = new TWEEN.Tween(rotation).to({ rotZ: Math.PI }, 4000)
+  tween2.easing(TWEEN.Easing.Linear.None)
+  tween2.onUpdate(() => {
+    wheel.rotation.z = rotation.rotZ
+    rim.rotation.z = -2 * rotation.rotZ
+  })
+  tween2.repeat(Infinity) // 1,2 arba Infinity
+  tween2.start() // stop
 }
 
 function createPlane() {
@@ -338,6 +470,26 @@ function createWindow() {
   scene.add(windowMesh)
 }
 
+function createParticles() {
+  const geometry = new THREE.TetrahedronGeometry(2, 0)
+
+  const material = new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    shading: THREE.FlatShading,
+  })
+  particle = new THREE.Object3D()
+  for (let i = 0; i < 1000; i++) {
+    let mesh = new THREE.Mesh(geometry, material)
+    mesh.position
+      .set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5)
+      .normalize()
+    mesh.position.multiplyScalar(30 + Math.random() * 700)
+    mesh.rotation.set(Math.random() * 2, Math.random() * 2, Math.random() * 2)
+    particle.add(mesh)
+  }
+
+  scene.add(particle)
+}
 function createWater() {
   let waterParams = {
     color: "#93B0FF",
@@ -432,6 +584,8 @@ function createMeshes() {
   createFloor()
   createWater()
   createCloud()
+  createParticles()
+  createWheel(tire)
 }
 
 // Renderer object and features
