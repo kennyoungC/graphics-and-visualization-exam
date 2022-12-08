@@ -7,8 +7,7 @@ import * as THREE from "./mods/three.module.js"
 import Stats from "./mods/stats.module.js"
 import { OrbitControls } from "./mods/OrbitControls.js"
 
-import { TWEEN } from "./mods/tween.module.min.js" // module for tween animations
-import { GUI } from "./mods/lil-gui.module.min.js"
+import { Water } from "./mods/Water2.js" // lib for water effect
 
 // Global variables
 let mainContainer = null
@@ -22,18 +21,14 @@ let fishes = null
 let camControls = null
 // Global Meshes
 
-let fish1,
-  fish2,
-  bubbles,
-  gui,
-  starFish,
-  water = null
-let controlBoxParams = {
-  rotateSpeed: 0,
-  y: 0,
-  x: 0,
-  z: 0,
-}
+let plane,
+  floor,
+  box,
+  sphere,
+  cone = null
+
+let water = null
+
 function init() {
   fpsContainer = document.querySelector("#fps")
   mainContainer = document.querySelector("#webgl-scene")
@@ -58,7 +53,6 @@ function init() {
   createMeshes()
   createLights()
   createRenderer()
-  createCtrBox()
   renderer.setAnimationLoop(() => {
     update()
     render()
@@ -66,12 +60,12 @@ function init() {
 }
 
 // Animations
-function update() {
-  TWEEN.update()
-}
+function update() {}
 
 // Statically rendered content
 function render() {
+  particle.rotation.x += 0.001
+  particle.rotation.y -= 0.03
   stats.begin()
   renderer.render(scene, camera)
   stats.end()
@@ -102,37 +96,98 @@ function createControls() {
   camControls = new OrbitControls(camera, mainContainer)
   camControls.autoRotate = false
 }
-function createCtrBox() {
-  gui = new GUI()
-  gui
-    .add(controlBoxParams, "z", -60, 30)
-    .min(1000)
-    .max(7000)
-    .step(50)
-    .onChange(function (value) {
-      const tween = new TWEEN.Tween(fishes.rotation)
-        .to({ y: Math.PI / 2 }, value) // relative animation
-        .onComplete(function () {
-          if (Math.abs(fishes.rotation.y) >= 2 * Math.PI) {
-            fishes.rotation.y = fishes.rotation.y % (2 * Math.PI)
-          }
-        })
-        .start()
-      tween.repeat(Infinity)
-    })
-    .name("rotation")
-  gui
-    .add(controlBoxParams, "x", -30, 30)
-    .step(5)
-    .onChange(function (value) {
-      fish2.position.x = value
-    })
-    .name("Fish 2 ")
-}
+
 // Light objects
 function createLights() {
   const ambientLight = new THREE.AmbientLight(0xffffff, 1)
   scene.add(ambientLight)
+}
+function createWheel() {
+  const texture = new THREE.TextureLoader().load("img/tire.jpg")
+  texture.wrapS = THREE.RepeatWrapping
+  texture.wrapT = THREE.RepeatWrapping
+  texture.repeat.set(20, 5)
+
+  const bump = new THREE.TextureLoader().load("img/tire_bump.jpg")
+  bump.wrapS = THREE.RepeatWrapping
+  bump.wrapT = THREE.RepeatWrapping
+  bump.repeat.set(20, 5)
+
+  let geometry = new THREE.TorusGeometry(3, 1, 16, 100)
+  let material = new THREE.MeshStandardMaterial({
+    map: texture,
+    bumpMap: bump,
+    bumpScale: 0.2,
+  })
+  tire = new THREE.Mesh(geometry, material)
+
+  // tire.position.set(0, 4, -10);
+  // tire.translateY(4);
+  // tire.translateZ(-10);
+  // scene.add( tire );
+
+  // create rim
+  const ballTexture = new THREE.TextureLoader().load("img/ball.jpg")
+  let rimGeometry = new THREE.SphereGeometry(2, 32, 16)
+  let rimMaterial = new THREE.MeshStandardMaterial({
+    map: ballTexture,
+    side: THREE.DoubleSide,
+    transparent: true,
+  })
+  rim = new THREE.Mesh(rimGeometry, rimMaterial)
+
+  wheel = new THREE.Group()
+  wheel.add(tire)
+  wheel.add(rim)
+
+  //wheel.position.set(0, 4, -10);
+  //scene.add(wheel);
+
+  tire.translateZ(-15)
+  rim.translateZ(-15)
+  wheel.position.set(7, 4, 10)
+  scene.add(wheel)
+}
+function createRotateTween() {
+  let position = { rotStep: -Math.PI }
+  let tween1 = new TWEEN.Tween(position).to({ rotStep: Math.PI }, 8000)
+  tween1.easing(TWEEN.Easing.Linear.None)
+  tween1.onUpdate(() => {
+    tire.rotation.y = position.rotStep
+    tire.position.x = 15 * Math.sin(position.rotStep)
+    tire.position.z = 15 * Math.cos(position.rotStep)
+  })
+  tween1.repeat(Infinity) // 1,2 arba Infinity
+  tween1.start() // stop
+
+  let rotation = { rotZ: -Math.PI }
+  let tween2 = new TWEEN.Tween(rotation).to({ rotZ: Math.PI }, 4000)
+  tween2.easing(TWEEN.Easing.Linear.None)
+  tween2.onUpdate(() => {
+    tire.rotation.z = -rotation.rotZ
+  })
+  tween2.repeat(Infinity) // 1,2 arba Infinity
+  tween2.start() // stop
+}
+function createGroupRotateTween() {
+  let position = { rotStep: -Math.PI }
+  let tween1 = new TWEEN.Tween(position).to({ rotStep: Math.PI }, 8000)
+  tween1.easing(TWEEN.Easing.Linear.None)
+  tween1.onUpdate(() => {
+    wheel.rotation.y = position.rotStep
+  })
+  tween1.repeat(Infinity) // 1,2 arba Infinity
+  tween1.start() // stop
+
+  let rotation = { rotZ: -Math.PI }
+  let tween2 = new TWEEN.Tween(rotation).to({ rotZ: Math.PI }, 4000)
+  tween2.easing(TWEEN.Easing.Linear.None)
+  tween2.onUpdate(() => {
+    wheel.rotation.z = rotation.rotZ
+    rim.rotation.z = -2 * rotation.rotZ
+  })
+  tween2.repeat(Infinity) // 1,2 arba Infinity
+  tween2.start() // stop
 }
 
 // Create sprite
@@ -193,21 +248,60 @@ function createStarFish() {
 
   starFish = new THREE.Mesh(geometry, colorMaterial)
 
-  starFish.rotation.x = Math.PI / 2
-  // starFish.rotation.y = (-Math.PI / 4) * 1.15
-  starFish.position.x = 30
-  starFish.position.y = -14
-  starFish.position.z = 5
-  scene.add(starFish)
-  const tween = new TWEEN.Tween(starFish.rotation)
-    .to({ y: Math.PI / 2 }, 10000) // relative animation
-    .onComplete(function () {
-      if (Math.abs(starFish.rotation.x) >= 2 * Math.PI) {
-        starFish.rotation.x = starFish.rotation.x % (2 * Math.PI)
-      }
-    })
-    .start()
-  tween.repeat(Infinity)
+  // texture.anisotropy = 30
+  texture.wrapS = THREE.RepeatWrapping
+  texture.wrapT = THREE.RepeatWrapping
+  texture.repeat.set(1, 1)
+  let doorMaterial = new THREE.MeshStandardMaterial({ map: texture })
+  let doorMesh = new THREE.Mesh(door, doorMaterial)
+  doorMesh.rotation.y = Math.PI * 0.5
+  doorMesh.position.x = -1.85
+  doorMesh.position.y = 5
+  doorMesh.position.z = -5
+  scene.add(doorMesh)
+}
+
+function createWindow() {
+  let window = new THREE.PlaneGeometry(4, 6, 7.5)
+  const texture = new THREE.TextureLoader().load("img/wooden_door.jpg")
+
+  // texture.anisotropy = 30
+  texture.wrapS = THREE.RepeatWrapping
+  texture.wrapT = THREE.RepeatWrapping
+  texture.repeat.set(1, 1)
+  let windowMaterial = new THREE.MeshStandardMaterial({ map: texture })
+  let windowMesh = new THREE.Mesh(window, windowMaterial)
+  windowMesh.rotation.y = Math.PI * 0.5
+  windowMesh.position.x = -1.85
+  windowMesh.position.y = 7
+  windowMesh.position.z = -15
+  scene.add(windowMesh)
+}
+
+function createWater() {
+  let waterParams = {
+    color: "#93B0FF",
+    scale: 4,
+    flowX: 0.6,
+    flowY: 0.6,
+    // sound: true
+  }
+  const waterGeometry = new THREE.CircleGeometry(30, 30)
+  water = new Water(waterGeometry, {
+    color: waterParams.color,
+    scale: waterParams.scale,
+    flowDirection: new THREE.Vector2(waterParams.flowX, waterParams.flowY),
+    textureWidth: 1024,
+    textureHeight: 1024,
+  })
+  water.rotation.x = -0.5 * Math.PI
+  water.position.y = 0.5
+  water.position.x = 0
+  water.position.z = 0
+  // water.position.y = 1
+  // water.position.x = 10
+  // water.position.z = 10
+  scene.add(water)
 }
 function createGroupFishes() {
   fishes = new THREE.Group()
@@ -228,11 +322,31 @@ function createGroupFishes() {
 
 // Meshes and other visible objects
 function createMeshes() {
-  createBubbles()
-  createFish1()
-  createFish2()
-  createStarFish()
-  createGroupFishes()
+  createPlane()
+  createSideWall()
+  const sideWall2 = createSideWall()
+  sideWall2.position.z = -3
+  createBackWall()
+  const roof1 = createRoof()
+  const roof2 = createRoof()
+  roof1.position.x = -5.5
+  roof2.rotation.y = (Math.PI / 4) * 1.15
+  roof2.position.x = -14
+  createFrontWall()
+  createRod()
+  const rod2 = createRod()
+  rod2.position.x = 5
+  const rod3 = createRod()
+  rod3.position.z = 9
+  const rod4 = createRod()
+  rod4.position.z = 9
+  rod4.position.x = 7
+  createGarageRoof()
+  createDoor()
+  createWindow()
+  createFloor()
+  createWater()
+  createCloud()
 }
 
 // Renderer object and features
